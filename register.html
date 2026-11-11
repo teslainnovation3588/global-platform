@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070b16">
+<title>Create Account | GLOBAL PLATFORM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Arial,sans-serif;
+background:#070b16;
+color:#fff;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:25px;
+}
+
+.container{
+width:100%;
+max-width:480px;
+background:#101a2c;
+padding:35px;
+border:1px solid #20314b;
+border-radius:15px;
+}
+
+.logo{
+text-align:center;
+font-size:25px;
+font-weight:900;
+margin-bottom:10px;
+}
+
+.logo span{color:#42d5ff}
+
+.subtitle{
+text-align:center;
+color:#a6b3c8;
+font-size:14px;
+margin-bottom:30px;
+}
+
+h2{
+font-size:22px;
+margin-bottom:20px;
+}
+
+label{
+display:block;
+font-size:13px;
+margin-bottom:8px;
+color:#dce7f7;
+}
+
+input,select{
+width:100%;
+padding:14px;
+margin-bottom:19px;
+border-radius:7px;
+border:1px solid #293b55;
+background:#081222;
+color:white;
+font-size:14px;
+outline:none;
+}
+
+input:focus,select:focus{
+border-color:#258cff;
+}
+
+button{
+width:100%;
+padding:15px;
+border:0;
+border-radius:7px;
+background:linear-gradient(90deg,#176de4,#278eff);
+color:white;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
+.message{
+font-size:13px;
+margin-top:18px;
+text-align:center;
+line-height:1.6;
+}
+
+.back{
+display:block;
+text-align:center;
+margin-top:23px;
+font-size:13px;
+color:#42d5ff;
+text-decoration:none;
+}
+
+.small{
+text-align:center;
+font-size:12px;
+color:#8293aa;
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+GLOBAL<span>PLATFORM</span>
+</div>
+
+<p class="subtitle">
+Create your account and connect to a world of opportunities.
+</p>
+
+<h2>Create Your Account</h2>
+
+<form id="registerForm">
+
+<label>Account Type</label>
+
+<select id="accountType" required>
+<option value="individual">Individual Account</option>
+<option value="business">Business Account</option>
+</select>
+
+<label>Full Name</label>
+<input
+type="text"
+id="fullName"
+placeholder="Enter your full name"
+required
+>
+
+<label>Country</label>
+<input
+type="text"
+id="country"
+placeholder="Enter your country"
+required
+>
+
+<label>Email Address</label>
+<input
+type="email"
+id="email"
+placeholder="Enter your email address"
+required
+>
+
+<label>Password</label>
+<input
+type="password"
+id="password"
+placeholder="Minimum 8 characters"
+minlength="8"
+required
+>
+
+<label>Confirm Password</label>
+<input
+type="password"
+id="confirmPassword"
+placeholder="Confirm your password"
+required
+>
+
+<button type="submit" id="registerButton">
+CREATE ACCOUNT
+</button>
+
+<div class="message" id="message"></div>
+
+</form>
+
+<a href="index.html" class="back">
+← Return to Homepage
+</a>
+
+<p class="small">
+Secure registration powered by GLOBAL PLATFORM.
+</p>
+
+</div>
+
+<script>
+
+// GLOBAL PLATFORM SUPABASE CONNECTION
+
+const SUPABASE_URL = "https://vxtzkeeiffrojvqnewip.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_UO87pWWGeHnRUmVvx3Exkg__g4E5onN";
+
+const supabaseClient = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+// READ ACCOUNT TYPE FROM HOMEPAGE LINK
+
+const params = new URLSearchParams(window.location.search);
+const selectedType = params.get("type");
+
+if(selectedType === "business" || selectedType === "individual"){
+document.getElementById("accountType").value = selectedType;
+}
+
+// REGISTRATION PROCESS
+
+const form = document.getElementById("registerForm");
+const message = document.getElementById("message");
+const button = document.getElementById("registerButton");
+
+form.addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+message.style.color = "#ff7777";
+message.textContent = "";
+
+const accountType = document.getElementById("accountType").value;
+const fullName = document.getElementById("fullName").value.trim();
+const country = document.getElementById("country").value.trim();
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value;
+const confirmPassword = document.getElementById("confirmPassword").value;
+
+if(password !== confirmPassword){
+message.textContent = "Your passwords do not match.";
+return;
+}
+
+if(password.length < 8){
+message.textContent = "Password must contain at least 8 characters.";
+return;
+}
+
+button.disabled = true;
+button.textContent = "CREATING ACCOUNT...";
+
+try{
+
+const {data,error} = await supabaseClient.auth.signUp({
+
+email: email,
+
+password: password,
+
+options: {
+data: {
+account_type: accountType,
+full_name: fullName,
+country: country
+}
+}
+
+});
+
+if(error){
+throw error;
+}
+
+if(data.user){
+
+message.style.color = "#42d5ff";
+
+if(data.session){
+
+message.textContent =
+"Your account has been created successfully! You can now sign in once the login page is available.";
+
+}else{
+
+message.textContent =
+"Registration successful! Please check your email for a confirmation link before signing in.";
+
+}
+
+form.reset();
+
+}else{
+
+throw new Error("Registration could not be completed.");
+
+}
+
+}catch(error){
+
+message.style.color = "#ff7777";
+message.textContent = error.message;
+
+}finally{
+
+button.disabled = false;
+button.textContent = "CREATE ACCOUNT";
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
