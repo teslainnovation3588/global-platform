@@ -4,12 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070b16">
+
 <title>Create Account | GLOBAL PLATFORM</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
 
 body{
 font-family:Arial,sans-serif;
@@ -38,7 +43,9 @@ font-weight:900;
 margin-bottom:10px;
 }
 
-.logo span{color:#42d5ff}
+.logo span{
+color:#42d5ff;
+}
 
 .subtitle{
 text-align:center;
@@ -142,6 +149,7 @@ Create your account and connect to a world of opportunities.
 </select>
 
 <label>Full Name</label>
+
 <input
 type="text"
 id="fullName"
@@ -150,6 +158,7 @@ required
 >
 
 <label>Country</label>
+
 <input
 type="text"
 id="country"
@@ -158,6 +167,7 @@ required
 >
 
 <label>Email Address</label>
+
 <input
 type="email"
 id="email"
@@ -166,6 +176,7 @@ required
 >
 
 <label>Password</label>
+
 <input
 type="password"
 id="password"
@@ -175,6 +186,7 @@ required
 >
 
 <label>Confirm Password</label>
+
 <input
 type="password"
 id="confirmPassword"
@@ -197,33 +209,56 @@ CREATE ACCOUNT
 <p class="small">
 Secure registration powered by GLOBAL PLATFORM.
 </p>
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyamlleHNxcm9waWpqenNxb3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0MzY4NDcsImV4cCI6MjExMDAxMjg0N30._Ax1-4qJOxOyNwjJvel3H_EGTIHIZRGthUxoYw11DYo";
+
 </div>
 
 <script>
 
-// GLOBAL PLATFORM SUPABASE CONNECTION
+// =================================
+// GLOBAL PLATFORM SUPABASE SETTINGS
+// =================================
 
-const SUPABASE_URL = "https://yrjiexsqropijjzsqora.supabase.co";
-const SUPABASE_KEY = "PASTE_THE_ANON_PUBLIC_KEY_YOU_JUST_SENT";
+const SUPABASE_URL =
+"https://yrjiexsqropijjzsqora.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_Yp3P0tBdqFVVWtnfwR9eew_iIf-q3ML";
+
+// =================================
+// INITIALIZE SUPABASE
+// =================================
+
 const supabaseClient = window.supabase.createClient(
 SUPABASE_URL,
 SUPABASE_KEY
 );
 
-// READ ACCOUNT TYPE FROM HOMEPAGE LINK
+// =================================
+// ACCOUNT TYPE SELECTION
+// =================================
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(
+window.location.search
+);
+
 const selectedType = params.get("type");
 
-if(selectedType === "business" || selectedType === "individual"){
-document.getElementById("accountType").value = selectedType;
+if(
+selectedType === "business" ||
+selectedType === "individual"
+){
+document.getElementById("accountType").value =
+selectedType;
 }
 
+// =================================
 // REGISTRATION PROCESS
+// =================================
 
 const form = document.getElementById("registerForm");
+
 const message = document.getElementById("message");
+
 const button = document.getElementById("registerButton");
 
 form.addEventListener("submit", async function(e){
@@ -233,80 +268,120 @@ e.preventDefault();
 message.style.color = "#ff7777";
 message.textContent = "";
 
-const accountType = document.getElementById("accountType").value;
-const fullName = document.getElementById("fullName").value.trim();
-const country = document.getElementById("country").value.trim();
-const email = document.getElementById("email").value.trim();
-const password = document.getElementById("password").value;
-const confirmPassword = document.getElementById("confirmPassword").value;
+const accountType =
+document.getElementById("accountType").value;
 
-if(password !== confirmPassword){
-message.textContent = "Your passwords do not match.";
-return;
-}
+const fullName =
+document.getElementById("fullName").value.trim();
+
+const country =
+document.getElementById("country").value.trim();
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value;
+
+const confirmPassword =
+document.getElementById("confirmPassword").value;
+
+// CHECK PASSWORD
 
 if(password.length < 8){
-message.textContent = "Password must contain at least 8 characters.";
+
+message.textContent =
+"Password must contain at least 8 characters.";
+
 return;
+
 }
 
+if(password !== confirmPassword){
+
+message.textContent =
+"Your passwords do not match.";
+
+return;
+
+}
+
+// DISABLE BUTTON
+
 button.disabled = true;
+
 button.textContent = "CREATING ACCOUNT...";
+
+// CONNECT TO SUPABASE
 
 try{
 
-const {data,error} = await supabaseClient.auth.signUp({
+const {data,error} =
+await supabaseClient.auth.signUp({
 
-email: email,
+email:email,
 
-password: password,
+password:password,
 
-options: {
-data: {
-account_type: accountType,
-full_name: fullName,
-country: country
+options:{
+
+data:{
+
+account_type:accountType,
+
+full_name:fullName,
+
+country:country
+
 }
+
 }
 
 });
 
 if(error){
+
 throw error;
+
 }
 
-if(data.user){
+if(!data.user){
+
+throw new Error(
+"Account creation could not be completed."
+);
+
+}
 
 message.style.color = "#42d5ff";
 
 if(data.session){
 
 message.textContent =
-"Your account has been created successfully! You can now sign in once the login page is available.";
+"Congratulations! Your account has been created successfully. Login functionality is coming next.";
 
 }else{
 
 message.textContent =
-"Registration successful! Please check your email for a confirmation link before signing in.";
+"Registration successful! Please check your email and confirm your account before signing in.";
 
 }
 
 form.reset();
 
-}else{
-
-throw new Error("Registration could not be completed.");
-
-}
-
 }catch(error){
 
+console.error("Registration error:",error);
+
 message.style.color = "#ff7777";
-message.textContent = error.message;
+
+message.textContent =
+error.message || "Registration failed. Please try again.";
 
 }finally{
 
 button.disabled = false;
+
 button.textContent = "CREATE ACCOUNT";
 
 }
