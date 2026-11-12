@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d19">
+
+<title>Login | GLOBAL PLATFORM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #080d19;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 440px;
+    background: #101a2c;
+    padding: 35px 28px;
+    border-radius: 18px;
+    border: 1px solid #203958;
+    box-shadow: 0 15px 50px rgba(0,0,0,.4);
+}
+
+.logo {
+    text-align: center;
+    color: #21a9ff;
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 27px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #a8b6ca;
+    font-size: 14px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+label {
+    display: block;
+    margin-bottom: 9px;
+    font-size: 14px;
+    color: #dce8f8;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    background: #080f1e;
+    border: 1px solid #29415f;
+    border-radius: 9px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+input:focus {
+    border-color: #169fff;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 9px;
+    background: #079cff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.message {
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+    line-height: 1.5;
+}
+
+.success {
+    display: block;
+    background: #103d2c;
+    color: #7fffc0;
+}
+
+.error {
+    display: block;
+    background: #461b25;
+    color: #ff9ca8;
+}
+
+.register {
+    text-align: center;
+    margin-top: 25px;
+    color: #a8b6ca;
+    font-size: 14px;
+}
+
+.register a {
+    color: #21a9ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.back {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.back a {
+    color: #8fa7c5;
+    text-decoration: none;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">GLOBAL PLATFORM</div>
+
+    <h1>Welcome Back</h1>
+
+    <p class="subtitle">
+        Sign in to access your global network
+        and opportunities.
+    </p>
+
+    <form id="loginForm">
+
+        <label>Email Address</label>
+        <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+        >
+
+        <label>Password</label>
+        <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+            required
+        >
+
+        <button type="submit" id="loginButton">
+            Sign In →
+        </button>
+
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <div class="register">
+        Don't have an account?
+        <a href="register.html">Create Account</a>
+    </div>
+
+    <div class="back">
+        <a href="index.html">← Back to Homepage</a>
+    </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://yrjiexsqropijjzsqora.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_Yp3P0tBdqFVVWtnfwR9eew_iIf-q3ML";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const message = document.getElementById("message");
+
+function showMessage(text, type) {
+    message.textContent = text;
+    message.className = "message " + type;
+}
+
+loginForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    loginButton.disabled = true;
+    loginButton.textContent = "Signing in...";
+    message.style.display = "none";
+
+    try {
+
+        const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) throw error;
+
+        const user = data.user;
+
+        const { data: profile, error: profileError } =
+        await supabaseClient
+            .from("profiles")
+            .select("account_type, full_name")
+            .eq("id", user.id)
+            .single();
+
+        if (profileError) {
+            throw new Error(
+                "Login succeeded, but your member profile could not be loaded. Please contact support."
+            );
+        }
+
+        showMessage("Login successful! Opening your dashboard...", "success");
+
+        if (profile.account_type === "business") {
+
+            window.location.href = "business-dashboard.html";
+
+        } else {
+
+            window.location.href = "individual-dashboard.html";
+
+        }
+
+    } catch (error) {
+
+        showMessage(error.message, "error");
+
+        loginButton.disabled = false;
+        loginButton.textContent = "Sign In →";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
